@@ -10,19 +10,12 @@ from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.output_parsers import StrOutputParser
 import os
 
-# Step3: Use an embedding model to embed the docs
-# Using HuggingFace embeddings: Faster and better quality than Ollama embeddings
-# Option 1 (Fastest): "sentence-transformers/all-MiniLM-L6-v2" - Very fast, good quality
-# Option 2 (Best Quality): "sentence-transformers/all-mpnet-base-v2" - Best accuracy, still fast
-
 # Step1: Load the pdf loader (PyMuPDF) to load and process the pdf docs
-# PyMuPDF is more robust than PyPDF and handles complex PDFs better
 def load_documents(file_path: str):
  loader = PyMuPDFLoader(file_path)
  return loader.load()
 
 # Step2: Chunk the pdf to store in vector DB, use any text splitter
-# Optimized for research papers: slightly smaller chunks for better semantic coherence
 def split_documents(documents: list[Document]):
  text_splitter = RecursiveCharacterTextSplitter(
   chunk_size=1000,
@@ -32,9 +25,6 @@ def split_documents(documents: list[Document]):
  return text_splitter.split_documents(documents)
 
 # Step3: Use an embedding model to embed the docs
-# Using HuggingFace embeddings: Faster and better quality than Ollama embeddings
-# Option 1 (Fastest): "sentence-transformers/all-MiniLM-L6-v2" - Very fast, good quality
-# Option 2 (Best Quality): "sentence-transformers/all-mpnet-base-v2" - Best accuracy, still fast
 def embed_docs():
  embeddings = HuggingFaceEmbeddings(
   model_name="sentence-transformers/all-MiniLM-L6-v2",
@@ -70,7 +60,6 @@ def build_vectorstore(chunk: list[Document], db_path: str):
  print("Creating ChromaDB and adding documents...")
  db = Chroma(embedding_function=embed, persist_directory=db_path)
  db.add_documents(chunk, ids = chunk_ids)
- # Note: persist() is no longer needed - ChromaDB automatically persists when using persist_directory
  all_docs = db.get()
  print(f"Total_chunks: {len(all_docs['ids'])}\n")
  print(f"ID: {all_docs['ids'][:5]}\n")
